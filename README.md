@@ -8,9 +8,9 @@ Desenvolver o back-end de um sistema web de vitrine virtual para a exibição do
 ## Tecnologias
  
 <div style="display: inline_block"><br>
-  <img align="center" alt="JavaScript" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg">
-  <img align="center" alt="Node.Js" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg">
-  <img align="center" alt="SQLite" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg">
+  <img align="center" title="JavaScript" alt="JavaScript" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg">
+  <img align="center" title="Node.Js" alt="Node.Js" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg">
+  <img align="center" title="SQLite" alt="SQLite" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg">
 </div>
 
 
