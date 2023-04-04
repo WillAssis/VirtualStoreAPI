@@ -1,0 +1,13 @@
+{
+  "name": "virtualstoreapi",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Grupo - OSASCOUAB-PJI110-SALA-001GRUPO-001",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
