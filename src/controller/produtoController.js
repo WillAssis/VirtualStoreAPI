@@ -1,13 +1,13 @@
-import { openDb } from "../configDb";
+import { openDb } from "../configDb.js";
 
-export async function createTable() {
+export async function createProductTable() {
     openDb().then(db => {
         db.exec(
             `CREATE TABLE IF NOT EXISTS produto (
                 id              INTEGER         PRIMARY KEY,
                 name            VARCHAR(100),
                 description     VARCHAR(100),
-                price           INTEGER,
+                price           FLOAT,
                 image           VARCHAR(100)
             )`
         );
