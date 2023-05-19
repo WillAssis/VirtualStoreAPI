@@ -98,6 +98,4 @@ app.delete('/produto/:id', async (req, res) => {
     }
 });
 
-deleteProduto(1);
-
 app.listen(3333, () => console.log('http://localhost:3333'));
