@@ -16,6 +16,9 @@ const app = express();
 
 app.use(express.json());
 
+// Usado pelas tags <img> no HTML para mostrar as imagens salvas
+app.use('/images', express.static(path.join(__dirname, '/public/images/')));
+
 createTable();
 
 app.get('/', (req, res) => {
@@ -76,6 +79,14 @@ app.get('/produto/:id', async (req, res) => {
     res.status(200).send(result);
 });
 
+/**
+ * O multer permite ver as informações enviadas por formulário
+ * 
+ * req.body mostra informações textuais
+ * req.file mostra informações da imagem enviada
+ * 
+ * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
+ */
 app.post('/new-product', upload.single('produto-image'), async (req, res) => {
     const result = await insertProduto({...req.body, image: req.file.path});
     res.status(201).send({
