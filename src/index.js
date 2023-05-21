@@ -92,7 +92,7 @@ app.post('/new-product', upload.single('produto-image'), async (req, res) => {
     res.status(201).send({
         id: result.lastID,
         ...req.body,
-        image: req.file.path
+        image: `images/${req.file.filename}`
     });
 });
 
