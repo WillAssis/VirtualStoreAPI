@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salvar produto</title>
+</head>
+
+<body>
+    <h1>Bem vindo ao nosso Projeto :)</h1>
+    <p>Formulário temporário para salvar informações no banco de dados</p>
+    <form action="/new-product" method="post" enctype="multipart/form-data">
+        <label for="name">
+            Nome do produto:
+            <input id="name" name="name" type="text">
+        </label>
+        <label for="descrição">
+            Descrição:
+            <input id="description" name="description" type="text">
+        </label>
+        <label for="price">
+            <input id="price" name="price" type="text">
+        </label>
+        <label for="image">
+            <input id="image" name="produto-image" type="file" accept="image/png, image/jpeg, image/jpg">
+        </label>
+        <button>Enviar</button>
+    </form>
+</body>
+
+</html>

@@ -1,8 +1,17 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
+import path from 'path';
+import multer from 'multer';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 
+// Gambiarra
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const upload = multer({ dest: path.join(__dirname, '/public/images/') });
 const app = express();
 
 app.use(express.json());
@@ -10,7 +19,7 @@ app.use(express.json());
 createTable();
 
 app.get('/', (req, res) => {
-    res.send('Bem vindo ao nosso Projeto :)');
+    res.sendFile(path.join(__dirname, '/public/form.html'));
 });
 
 app.get('/cliente', async (req, res) => {
@@ -67,11 +76,12 @@ app.get('/produto/:id', async (req, res) => {
     res.status(200).send(result);
 });
 
-app.post('/produto', async (req, res) => {
-    const result = await insertProduto(req.body);
+app.post('/new-product', upload.single('produto-image'), async (req, res) => {
+    const result = await insertProduto({...req.body, image: req.file.path});
     res.status(201).send({
         id: result.lastID,
-        ...req.body
+        ...req.body,
+        image: req.file.path
     });
 });
 
