@@ -6,24 +6,18 @@ import { createTable, deleteClient, getAllClients, getClient, insertClient, upda
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImage from './utils/deleteImage.js';
 
-// Gambiarra
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const upload = multer({ dest: path.join(__dirname, '/public/images/') });
+const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
 
 app.use(express.json());
 
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
-app.use('/images', express.static(path.join(__dirname, '/public/images/')));
+app.use('/images', express.static(path.resolve('src/public/images')));
 
 createTable();
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/form.html'));
+    res.sendFile(path.resolve('src/public/', 'form.html'));
 });
 
 app.get('/cliente', async (req, res) => {
@@ -77,14 +71,14 @@ createProductTable();
 app.get('/produtos', async (req, res) => {
     const produtos = await getAllProdutos();
     produtos.forEach((produto) => {
-        produto.image = produto.image.replace(__dirname + '/public/', '');
+        produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
     });
     res.send(produtos);
 });
 
 app.get('/produto/:id', async (req, res) => {
     const produto = await getProduto(req.params.id);
-    produto.image = produto.image.replace(__dirname + '/public/', '');
+    produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
     res.status(200).send(produto);
 });
 
