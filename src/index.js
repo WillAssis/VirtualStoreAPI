@@ -97,7 +97,6 @@ app.get('/produto/:id', async (req, res) => {
  * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
  */
 app.post('/new-product', upload.single('produto-image'), async (req, res) => {
-    console.log(req.file);
     const result = await insertProduto({...req.body, image: req.file.path});
     res.status(201).send({
         id: result.lastID,
