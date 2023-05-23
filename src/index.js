@@ -1,12 +1,11 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
-import multer from 'multer';
+import upload from './middlewares/form-handler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImage from './utils/deleteImage.js';
 
-const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
 
 app.use(express.json());
@@ -82,14 +81,6 @@ app.get('/produto/:id', async (req, res) => {
     res.status(200).send(produto);
 });
 
-/**
- * O multer permite ver as informações enviadas por formulário
- * 
- * req.body mostra informações textuais
- * req.file mostra informações da imagem enviada
- * 
- * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
- */
 app.post('/new-product', upload.single('produto-image'), async (req, res) => {
     const result = await insertProduto({...req.body, image: req.file.path});
     res.status(201).send({
