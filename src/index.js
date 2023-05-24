@@ -73,8 +73,12 @@ app.get('/produtos', async (req, res) => {
 });
 
 app.get('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    res.status(200).send(produto);
+    try {
+        const produto = await getProduto(req.params.id);
+        res.status(200).send(produto);
+    } catch (error) {
+        res.status(204).send();
+    }
 });
 
 app.post('/new-product', upload.array('images', 5), async (req, res) => {
