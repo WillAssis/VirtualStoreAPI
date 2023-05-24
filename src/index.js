@@ -63,10 +63,6 @@ app.delete('/cliente/:id', async (req, res) => {
 
 createProductTable();
 
-/**
- * Os diretórios absolutos das imagens salvas no banco de dados são substituídos pelo
- * padrão 'images/[nome da imagem]' quando enviados para o client side
- */
 app.get('/produtos', async (req, res) => {
     const produtos = await getAllProdutos();
     res.send(produtos);
@@ -77,6 +73,7 @@ app.get('/produto/:id', async (req, res) => {
         const produto = await getProduto(req.params.id);
         res.status(200).send(produto);
     } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });
@@ -91,16 +88,20 @@ app.post('/new-product', upload.array('images', 5), async (req, res) => {
     });
 });
 
+// TODO: testar o method put
 app.put('/produto/:id', upload.single('produto-image'), async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
-        await updateProduto({...req.body, image: req.file.path});
+    try {
+        const produto = await getProduto(req.params.id);
+        const images = req.files.map((img) => img.filename);
         await deleteImage(produto);
+        await updateProduto({...req.body, images: images});
         res.status(200).send({
-            id: req.params.id,
-            ...req.body
+                id: req.params.id,
+                ...req.body,
+                images
         });
-    } else {
+    } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });
@@ -112,6 +113,7 @@ app.delete('/produto/:id', async (req, res) => {
         deleteImages(produto.images);
         res.status(200).send('Produto deletado');
     } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });

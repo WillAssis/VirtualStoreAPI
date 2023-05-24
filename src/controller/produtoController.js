@@ -41,7 +41,7 @@ export async function updateProduto(produto) {
             `UPDATE produto
             SET name=?, description=?, price=?, images=?
             WHERE id=?`,
-            [produto.name, produto.description, produto.price, produto.image, produto.id]
+            [produto.name, produto.description, Math.round(produto.price*100), JSON.stringify(produto.images)]
         );
     });
 };
