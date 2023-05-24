@@ -16,7 +16,7 @@ app.use('/images', express.static(path.resolve('src/public/images')));
 createTable();
 
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve('src/public/', 'form.html'));
+    res.send('Bem vindo ao nosso Projeto :)');
 });
 
 app.get('/cliente', async (req, res) => {
