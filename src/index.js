@@ -78,7 +78,7 @@ app.get('/produto/:id', async (req, res) => {
     }
 });
 
-app.post('/new-product', upload.array('images', 5), async (req, res) => {
+app.post('/novo-produto', upload.array('images', 5), async (req, res) => {
     const images = req.files.map((img) => img.filename);
     if (images.length === 0) {
         images.push('placeholder.png');
