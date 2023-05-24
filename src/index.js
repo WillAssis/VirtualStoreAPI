@@ -69,27 +69,21 @@ createProductTable();
  */
 app.get('/produtos', async (req, res) => {
     const produtos = await getAllProdutos();
-    produtos.forEach((produto) => {
-        produto.images = produto.images.map((url) => {
-            return url.replace(path.resolve('src/public') + '/', '');
-        });
-    });
     res.send(produtos);
 });
 
 app.get('/produto/:id', async (req, res) => {
     const produto = await getProduto(req.params.id);
-    produto.images = produto.images.map((url) => url.replace(path.resolve('src/public') + '/', ''))
     res.status(200).send(produto);
 });
 
 app.post('/new-product', upload.array('images', 5), async (req, res) => {
-    const images = req.files.map((img) => img.path);
+    const images = req.files.map((img) => img.filename);
     const result = await insertProduto({...req.body, images: images});
     res.status(201).send({
         id: result.lastID,
         ...req.body,
-        images: images
+        images
     });
 });
 
@@ -111,7 +105,6 @@ app.delete('/produto/:id', async (req, res) => {
     const produto = await getProduto(req.params.id);
     if (produto) {
         await deleteProduto(req.params.id);
-        await deleteImage(produto);
         res.status(200).send('Produto deletado');
     } else {
         res.status(204).send();

@@ -15,12 +15,8 @@ export async function createProductTable() {
     });
 };
 
-/**
- * As imagens são salvas no formato JSON como um array de caminhos/paths na forma
- *      '[caminho-até-o-projeto]/src/public/images/[imagem]'
- */
+// Um array contendo o nome das imagens dos produtos é salvo no formato JSON
 export async function insertProduto(produto) {
-    console.log(produto);
     return openDb().then(db => {
         return db.run(
             `INSERT INTO produto (name, description, price, images)
@@ -66,6 +62,8 @@ export async function deleteProduto(id) {
             `DELETE FROM produto
             WHERE id == ${id}`
         )
-            .then(res => res);
+            .then(res => {
+                res
+            });
     });
 };
