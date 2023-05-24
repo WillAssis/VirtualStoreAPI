@@ -1,6 +1,17 @@
 import { openDb } from "../configDb.js";
 import formatProduct from "../utils/formatProduct.js";
 
+/**
+ * Gambiarras:
+ *      -> Os nomes das imagens estão sendo armazenas como um array no formato JSON na própria
+ *      tabela dos produtos.
+ *      -> O preço dos produtos é multiplicado por 100 e transformado em integer para facilitar
+ *      a conversão de valores e resultar em 2 casas decimais.
+ * TODO:
+ *      -> Criar uma nova tabela para armazenar os nomes das imagens em cada coluna, com uma
+ *      foreign key para o id de um produto em cada instância
+ */
+
 export async function createProductTable() {
     openDb().then(db => {
         db.exec(
@@ -15,7 +26,6 @@ export async function createProductTable() {
     });
 };
 
-// Um array contendo o nome das imagens dos produtos é salvo no formato JSON
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(

@@ -3,12 +3,11 @@ import path from 'path';
 import fs from 'fs';
 
 /**
- * O multer permite ver as informações enviadas por formulário
+ * O multer da acesso às informações enviadas por formulário nas requisições:
+ *      -> 'req.body' mostra informações textuais
+ *      -> 'req.file' mostra informações das imagens enviadas
  * 
- * req.body mostra informações textuais
- * req.file mostra informações da imagem enviada
- * 
- * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
+ * As imagens são salvas automaticamente em src/public/images e seu nome no banco de dados
  */
 
 const storage = multer.diskStorage({
