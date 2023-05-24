@@ -8,18 +8,22 @@ export async function createProductTable() {
                 name            VARCHAR(100),
                 description     VARCHAR(100),
                 price           FLOAT,
-                image           VARCHAR(100)
+                images          VARCHAR(256)
             )`
         );
     });
 };
 
+/**
+ * As imagens são salvas no formato JSON como um array de caminhos/paths na forma
+ *      '[caminho-até-o-projeto]/src/public/images/[imagem]'
+ */
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(
-            `INSERT INTO produto (name, description, price, image)
+            `INSERT INTO produto (name, description, price, images)
             VALUES (?, ?, ?, ?)`,
-            [produto.name, produto.description, produto.price, produto.image]
+            [produto.name, produto.description, produto.price, JSON.stringify(produto.images)]
         );
     });
 };
@@ -29,8 +33,16 @@ export async function getProduto(id) {
         return db.get(
             `SELECT * FROM produto
             WHERE produto.id == ${id}`
-        )
-            .then(res => res)
+        ).then(res => {
+            console.log(res);
+            console.log(JSON.parse(res.images));
+            return {
+                name: res.name,
+                description: res.description,
+                price: res.price,
+                images: JSON.parse(res.images)
+            }
+        });
     });
 };
 
@@ -38,7 +50,7 @@ export async function updateProduto(produto) {
     openDb().then(db => {
         db.run(
             `UPDATE produto
-            SET name=?, description=?, price=?, image=?
+            SET name=?, description=?, price=?, images=?
             WHERE id=?`,
             [produto.name, produto.description, produto.price, produto.image, produto.id]
         );
@@ -49,8 +61,17 @@ export async function getAllProdutos() {
     return openDb().then(db => {
         return db.all(
             'SELECT * FROM produto'
-        )
-            .then(res => res);
+        ).then(res => {
+            return res.map((produto) => {
+                console.log(produto);
+                return {
+                    name: produto.name,
+                    description: produto.description,
+                    price: produto.price,
+                    images: JSON.parse(produto.images)
+                }
+            })
+        });
     });
 };
 

@@ -70,23 +70,26 @@ createProductTable();
 app.get('/produtos', async (req, res) => {
     const produtos = await getAllProdutos();
     produtos.forEach((produto) => {
-        produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
+        produto.images = produto.images.map((url) => {
+            return url.replace(path.resolve('src/public') + '/', '');
+        });
     });
     res.send(produtos);
 });
 
 app.get('/produto/:id', async (req, res) => {
     const produto = await getProduto(req.params.id);
-    produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
+    produto.images = produto.images.map((url) => url.replace(path.resolve('src/public') + '/', ''))
     res.status(200).send(produto);
 });
 
-app.post('/new-product', upload.single('produto-image'), async (req, res) => {
-    const result = await insertProduto({...req.body, image: req.file.path});
+app.post('/new-product', upload.array('images', 5), async (req, res) => {
+    const images = req.files.map((img) => img.path);
+    const result = await insertProduto({...req.body, images: images});
     res.status(201).send({
         id: result.lastID,
         ...req.body,
-        image: `images/${req.file.filename}`
+        images: images
     });
 });
 
