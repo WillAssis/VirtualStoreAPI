@@ -4,7 +4,7 @@ import path from 'path';
 import upload from './middlewares/form-handler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
-import deleteImage from './utils/deleteImage.js';
+import deleteImages from './utils/deleteImage.js';
 
 const app = express();
 
@@ -102,11 +102,12 @@ app.put('/produto/:id', upload.single('produto-image'), async (req, res) => {
 });
 
 app.delete('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
+    try {
+        const produto = await getProduto(req.params.id);
         await deleteProduto(req.params.id);
+        deleteImages(produto.images);
         res.status(200).send('Produto deletado');
-    } else {
+    } catch (error) {
         res.status(204).send();
     }
 });
