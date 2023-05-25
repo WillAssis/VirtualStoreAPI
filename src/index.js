@@ -1,23 +1,19 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
-import multer from 'multer';
+import upload from './middlewares/form-handler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
-import deleteImage from './utils/deleteImage.js';
+import deleteImages from './utils/deleteImage.js';
 
-const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
 
 app.use(express.json());
 
-// Usado pelas tags <img> no HTML para mostrar as imagens salvas
-app.use('/images', express.static(path.resolve('src/public/images')));
-
 createTable();
 
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve('src/public/', 'form.html'));
+    res.send('Bem vindo ao nosso Projeto :)');
 });
 
 app.get('/cliente', async (req, res) => {
@@ -64,62 +60,69 @@ app.delete('/cliente/:id', async (req, res) => {
 
 createProductTable();
 
+// Usado pelas tags <img> no front para mostrar as imagens salvas
+app.use('/images', express.static(path.resolve('src/public/images')));
+
 /**
- * Os diretórios absolutos das imagens salvas no banco de dados são substituídos pelo
- * padrão 'images/[nome da imagem]' quando enviados para o client side
+ * TODO:
+ *      -> Fazer verificações relacionadas à segurança;
+ *      -> Criar autenticação para as operações de post, put e delete.
  */
+
 app.get('/produtos', async (req, res) => {
     const produtos = await getAllProdutos();
-    produtos.forEach((produto) => {
-        produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
-    });
     res.send(produtos);
 });
 
 app.get('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
-    res.status(200).send(produto);
+    try {
+        const produto = await getProduto(req.params.id);
+        res.status(200).send(produto);
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
 });
 
-/**
- * O multer permite ver as informações enviadas por formulário
- * 
- * req.body mostra informações textuais
- * req.file mostra informações da imagem enviada
- * 
- * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
- */
-app.post('/new-product', upload.single('produto-image'), async (req, res) => {
-    const result = await insertProduto({...req.body, image: req.file.path});
+app.post('/novo-produto', upload.array('images', 5), async (req, res) => {
+    const images = req.files.map((img) => img.filename);
+    if (images.length === 0) {
+        images.push('placeholder.png');
+    }
+    const result = await insertProduto({...req.body, images: images});
     res.status(201).send({
         id: result.lastID,
         ...req.body,
-        image: `images/${req.file.filename}`
+        images
     });
 });
 
-app.put('/produto/:id', upload.single('produto-image'), async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
-        await updateProduto({...req.body, image: req.file.path});
+// TODO: testar o method put
+app.put('/produto/:id', upload.single('images'), async (req, res) => {
+    try {
+        const produto = await getProduto(req.params.id);
+        const images = req.files.map((img) => img.filename);
         await deleteImage(produto);
+        await updateProduto({...req.body, images: images});
         res.status(200).send({
-            id: req.params.id,
-            ...req.body
+                id: req.params.id,
+                ...req.body,
+                images
         });
-    } else {
+    } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });
 
 app.delete('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
+    try {
+        const produto = await getProduto(req.params.id);
         await deleteProduto(req.params.id);
-        await deleteImage(produto);
+        deleteImages(produto.images);
         res.status(200).send('Produto deletado');
-    } else {
+    } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });

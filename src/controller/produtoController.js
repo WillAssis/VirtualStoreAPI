@@ -1,4 +1,16 @@
 import { openDb } from "../configDb.js";
+import formatProduct from "../utils/formatProduct.js";
+
+/**
+ * Gambiarras:
+ *      -> Os nomes das imagens estão sendo armazenas como um array no formato JSON na própria
+ *      tabela dos produtos.
+ *      -> O preço dos produtos é multiplicado por 100 e transformado em integer para facilitar
+ *      a conversão de valores e resultar em 2 casas decimais.
+ * TODO:
+ *      -> Criar uma nova tabela para armazenar os nomes das imagens em cada coluna, com uma
+ *      foreign key para o id de um produto em cada instância
+ */
 
 export async function createProductTable() {
     openDb().then(db => {
@@ -7,8 +19,8 @@ export async function createProductTable() {
                 id              INTEGER         PRIMARY KEY,
                 name            VARCHAR(100),
                 description     VARCHAR(100),
-                price           FLOAT,
-                image           VARCHAR(100)
+                price           INTEGER,
+                images          VARCHAR(256)
             )`
         );
     });
@@ -17,9 +29,9 @@ export async function createProductTable() {
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(
-            `INSERT INTO produto (name, description, price, image)
+            `INSERT INTO produto (name, description, price, images)
             VALUES (?, ?, ?, ?)`,
-            [produto.name, produto.description, produto.price, produto.image]
+            [produto.name, produto.description, Math.round(produto.price*100), JSON.stringify(produto.images)]
         );
     });
 };
@@ -29,8 +41,7 @@ export async function getProduto(id) {
         return db.get(
             `SELECT * FROM produto
             WHERE produto.id == ${id}`
-        )
-            .then(res => res)
+        ).then(res => formatProduct(res));
     });
 };
 
@@ -38,9 +49,9 @@ export async function updateProduto(produto) {
     openDb().then(db => {
         db.run(
             `UPDATE produto
-            SET name=?, description=?, price=?, image=?
+            SET name=?, description=?, price=?, images=?
             WHERE id=?`,
-            [produto.name, produto.description, produto.price, produto.image, produto.id]
+            [produto.name, produto.description, Math.round(produto.price*100), JSON.stringify(produto.images)]
         );
     });
 };
@@ -49,8 +60,9 @@ export async function getAllProdutos() {
     return openDb().then(db => {
         return db.all(
             'SELECT * FROM produto'
-        )
-            .then(res => res);
+        ).then(res => {
+            return res.map((produto) => formatProduct(produto));
+        });
     });
 };
 
@@ -60,6 +72,8 @@ export async function deleteProduto(id) {
             `DELETE FROM produto
             WHERE id == ${id}`
         )
-            .then(res => res);
+            .then(res => {
+                res
+            });
     });
 };
