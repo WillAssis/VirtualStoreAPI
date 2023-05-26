@@ -56,13 +56,21 @@ export async function updateProduto(produto) {
     });
 };
 
-export async function getAllProdutos() {
+export async function getAllProdutos(data) {
+    console.log(`
+        SELECT * FROM produto
+        ${(data.search) ? 'WHERE name = ' + '"' + data.search + '"' : ''}
+        ${(data.orderBy) ? 'ORDER BY ' + data.orderBy : ''}
+        LIMIT 12 OFFSET ${12 * (data.page - 1)};`
+    )
     return openDb().then(db => {
         return db.all(
-            'SELECT * FROM produto'
-        ).then(res => {
-            return res.map((produto) => formatProduct(produto));
-        });
+            `SELECT * FROM produto
+            ${(data.search) ? 'WHERE name = ' + '"' + data.search + '"' : ''}
+            ${(data.orderBy) ? 'ORDER BY ' + data.orderBy : ''}
+            LIMIT 12 OFFSET ${12 * (data.page - 1)};`
+        )
+            .then(res => res.map((produto) => formatProduct(produto)));
     });
 };
 

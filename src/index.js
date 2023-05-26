@@ -1,7 +1,7 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
-import upload from './middlewares/form-handler.js';
+import upload from './middlewares/formHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
@@ -60,18 +60,28 @@ app.delete('/cliente/:id', async (req, res) => {
 
 createProductTable();
 
-// Usado pelas tags <img> no front para mostrar as imagens salvas
-app.use('/images', express.static(path.resolve('src/public/images')));
-
 /**
  * TODO:
  *      -> Fazer verificações relacionadas à segurança;
  *      -> Criar autenticação para as operações de post, put e delete.
  */
 
+// Usado pelas tags <img> no front para mostrar as imagens salvas
+app.use('/images', express.static(path.resolve('src/public/images')));
+
 app.get('/produtos', async (req, res) => {
-    const produtos = await getAllProdutos();
-    res.send(produtos);
+    const data = {
+        search: req.query.search || '',
+        orderBy: req.query.orderBy || '',
+        page: (req.query.page) ? parseInt(req.query.page) : 1
+    }
+    const produtos = await getAllProdutos(data);
+    if (produtos.length > 0) {
+        res.send(produtos);
+    } else {
+        res.send('Sem resultados');
+    }
+    
 });
 
 app.get('/produto/:id', async (req, res) => {
