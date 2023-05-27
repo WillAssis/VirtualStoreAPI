@@ -11,6 +11,8 @@
 
 const URLQueryHandler = (req, res, next) => {
     try {
+        req.query.pageSize = 12; // Valor fixo para número de itens retornados
+        
         if (req.query.page) {
             const page = parseInt(req.query.page); // Pode gerar valor NaN
             if (Number.isInteger(page) && page > 0) {
@@ -32,7 +34,7 @@ const URLQueryHandler = (req, res, next) => {
         // TODO: verificar as pesquisas
         const search = req.query.search;
         req.query.search = (search) ? search : null;
-        
+
         next();
     } catch (error) {
         console.log(error);

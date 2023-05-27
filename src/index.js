@@ -4,7 +4,7 @@ import path from 'path';
 import upload from './middlewares/formHandler.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
-import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
+import { countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
 
 const app = express();
@@ -71,11 +71,17 @@ createProductTable();
 // Usado pelas tags <img> no front para mostrar as imagens salvas
 app.use('/images', express.static(path.resolve('src/public/images')));
 
+// A quantidade de páginas disponíveis é enviada para o front-end para facilitar a criação dos botões
 app.get('/produtos', URLQueryHandler, async (req, res) => {
     try {
-        const produtos = await getAllProdutos(req.query);
+        const produtos = await getProdutos(req.query);
+        const dbLength = await countProdutos();
         if (produtos.length > 0) {
-            res.send(produtos);
+            res.send({
+                products: produtos,
+                pages: Math.ceil(dbLength.size / req.query.pageSize),
+                currentPage: req.query.page
+            });
         } else {
             res.send('Sem resultados');
         }
