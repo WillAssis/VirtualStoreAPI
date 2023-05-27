@@ -1,10 +1,25 @@
-// import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
 import multer from 'multer';
-import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
-import { createProductTable, deleteProduto, getAllProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
+import {
+    createTable,
+    deleteClient,
+    getAllClients,
+    getClient,
+    insertClient,
+    updateClient
+} from './controller/clienteController.js';
+import {
+    createProductTable,
+    deleteProduto,
+    getAllProdutos,
+    getProduto,
+    insertProduto,
+    updateProduto
+} from './controller/produtoController.js';
 import deleteImage from './utils/deleteImage.js';
+import { createPedidoTable, getAllPedidos, insertPedido } from './controller/pedidoController.js'
+import { createProdutoPedidoTable } from './controller/produtoPedidoController.js';
 
 const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
@@ -14,7 +29,10 @@ app.use(express.json());
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
 app.use('/images', express.static(path.resolve('src/public/images')));
 
-createTable();
+await createTable();
+await createProductTable();
+await createPedidoTable();
+await createProdutoPedidoTable();
 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve('src/public/', 'form.html'));
@@ -27,14 +45,20 @@ app.get('/cliente', async (req, res) => {
 
 app.get('/cliente/:id', async (req, res) => {
     const result = await getClient(req.params.id);
-    res.status(200).send(result);
+    if (!result) {
+        res.status(204).send();
+    }
+    if (result) {
+        res.status(200).send(result);
+    }
 });
 
 app.post('/cliente', async (req, res) => {
-    const result = await insertClient(req.body)
+    const { cliente } = req.body;
+    const result = await insertClient(cliente)
     res.status(201).send({
         id: result.lastID,
-        ...req.body
+        cliente
     });
 });
 
@@ -61,8 +85,6 @@ app.delete('/cliente/:id', async (req, res) => {
         res.status(204).send();
     }
 });
-
-createProductTable();
 
 /**
  * Os diretórios absolutos das imagens salvas no banco de dados são substituídos pelo
@@ -121,6 +143,25 @@ app.delete('/produto/:id', async (req, res) => {
         res.status(200).send('Produto deletado');
     } else {
         res.status(204).send();
+    }
+});
+
+app.get('/pedido', async (req, res) => {
+    const pedidos = await getAllPedidos();
+
+    res.send(pedidos);
+});
+
+app.post('/pedido', async (req, res) => {
+    const { pedido } = req.body;
+    console.log(pedido)
+
+    try {
+        const result = await insertPedido(pedido);
+        console.log(result)
+        res.status(201).send({ id: result.lastID, ...pedido });
+    } catch (e) {
+        res.status(e.statusCode || 400).send(e.message)
     }
 });
 
