@@ -11,8 +11,16 @@
 
 const URLQueryHandler = (req, res, next) => {
     try {
-        const page = parseInt(req.query.page);
-        req.query.page = ((Number.isInteger(page) && page > 0) ? page : 1);
+        if (req.query.page) {
+            const page = parseInt(req.query.page); // Pode gerar valor NaN
+            if (Number.isInteger(page) && page > 0) {
+                req.query.page = page;
+            } else {
+                res.send('Sem resultados');
+            }
+        } else {
+            req.query.page = 1;
+        }
 
         const orderBy = req.query.orderBy;
         if (orderBy) {
@@ -24,7 +32,7 @@ const URLQueryHandler = (req, res, next) => {
         // TODO: verificar as pesquisas
         const search = req.query.search;
         req.query.search = (search) ? search : null;
-
+        
         next();
     } catch (error) {
         console.log(error);
