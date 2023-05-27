@@ -14,7 +14,8 @@ app.use(express.json());
 createTable();
 
 app.get('/', (req, res) => {
-    res.send('Bem vindo ao nosso Projeto :)');
+    //res.send('Bem vindo ao nosso Projeto :)');
+    res.sendFile(path.resolve('src/public', 'index.html'));
 });
 
 app.get('/cliente', async (req, res) => {
@@ -95,16 +96,24 @@ app.get('/produto/:id', async (req, res) => {
 });
 
 app.post('/novo-produto', upload.array('images', 5), async (req, res) => {
-    const images = req.files.map((img) => img.filename);
-    if (images.length === 0) {
-        images.push('placeholder.png');
+    try {
+        let images = [];
+        if (req.files) {
+            images = req.files.map((img) => img.filename);
+        }
+        if (images.length === 0) {
+            images.push('placeholder.png');
+        }
+        const result = await insertProduto({...req.body, images: images});
+        res.status(201).send({
+            id: result.lastID,
+            ...req.body,
+            images
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
     }
-    const result = await insertProduto({...req.body, images: images});
-    res.status(201).send({
-        id: result.lastID,
-        ...req.body,
-        images
-    });
 });
 
 // TODO: testar o method put
