@@ -56,15 +56,26 @@ export async function updateProduto(produto) {
     });
 };
 
-export async function getAllProdutos() {
+export async function getProdutos(data) {
     return openDb().then(db => {
         return db.all(
-            'SELECT * FROM produto'
-        ).then(res => {
-            return res.map((produto) => formatProduct(produto));
-        });
+            `SELECT * FROM produto
+            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''}
+            ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
+            LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
+        )
+            .then(res => res.map((produto) => formatProduct(produto)));
     });
 };
+
+export async function countProdutos(data) {
+    return openDb().then(db => {
+        return db.get(
+            `SELECT COUNT() AS size FROM produto
+            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''};`
+        );
+    });
+}
 
 export async function deleteProduto(id) {
     return openDb().then(db => {
