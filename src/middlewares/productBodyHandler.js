@@ -15,7 +15,6 @@ const productBodyHandler = (req, res, next) => {
             res.send('Preço inválido');
         }
 
-        console.log(req.files);
         if (!req.files || req.files.length === 0) {
             req.files = [{filename: 'placeholder.png'}];
         }
