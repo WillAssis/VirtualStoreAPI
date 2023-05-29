@@ -104,7 +104,6 @@ app.get('/produto/:id', async (req, res) => {
 
 app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (req, res) => {
     try {
-        console.log(req.files);
         const images = req.files.map((img) => img.filename);
         const result = await insertProduto({...req.body, images: images});
         res.status(201).send({
