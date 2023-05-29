@@ -10,8 +10,8 @@ const productBodyHandler = (req, res, next) => {
             throw new Error('Descrição é obrigatória');
         }
 
-        const price = parseInt(req.body.price);
-        if (!Number.isInteger(price) || price <= 0) {
+        const price = parseFloat(req.body.price);
+        if (Number.isNaN(price) || price <= 0) {
             throw new Error('Preço inválido');
         }
 
