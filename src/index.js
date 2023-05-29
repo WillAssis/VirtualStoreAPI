@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import upload from './middlewares/formHandler.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
+import productBodyHandler from './middlewares/productBodyHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
@@ -101,12 +102,10 @@ app.get('/produto/:id', async (req, res) => {
     }
 });
 
-app.post('/novo-produto', upload.array('images', 5), async (req, res) => {
+app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (req, res) => {
     try {
-        let images = ['placeholder.png'];
-        if (req.files && req.files.length !== 0) {
-            images = req.files.map((img) => img.filename);
-        }
+        console.log(req.files);
+        const images = req.files.map((img) => img.filename);
         const result = await insertProduto({...req.body, images: images});
         res.status(201).send({
             id: result.lastID,
