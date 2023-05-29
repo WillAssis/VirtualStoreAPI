@@ -18,7 +18,7 @@ const URLQueryHandler = (req, res, next) => {
             if (Number.isInteger(page) && page > 0) {
                 req.query.page = page;
             } else {
-                res.send('Sem resultados');
+                throw new Error('Sem resultados');
             }
         } else {
             req.query.page = 1;
@@ -37,8 +37,7 @@ const URLQueryHandler = (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log(error);
-        res.status(204).send();
+        res.status(204).send(error);
     }
 }
 

@@ -3,16 +3,16 @@
 const productBodyHandler = (req, res, next) => {
     try {
         if (!req.body.name) {
-            res.send('Nome é obrigatório');
+            throw new Error('Nome é obrigatório');
         }
 
         if (!req.body.description) {
-            res.send('Descrição é obrigatória');
+            throw new Error('Descrição é obrigatória');
         }
 
         const price = parseInt(req.body.price);
         if (!Number.isInteger(price) || price <= 0) {
-            res.send('Preço inválido');
+            throw new Error('Preço inválido');
         }
 
         if (!req.files || req.files.length === 0) {
@@ -21,8 +21,7 @@ const productBodyHandler = (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log(error);
-        res.status(204).send();
+        res.status(204).send(error);
     }
 }
 
