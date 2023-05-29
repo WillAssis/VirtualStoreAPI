@@ -14,8 +14,7 @@ app.use(express.json());
 createTable();
 
 app.get('/', (req, res) => {
-    //res.send('Bem vindo ao nosso Projeto :)');
-    res.sendFile(path.resolve('src/public', 'index.html'));
+    res.send('Bem vindo ao nosso Projeto :)');
 });
 
 app.get('/cliente', async (req, res) => {
@@ -71,7 +70,7 @@ createProductTable();
 // Usado pelas tags <img> no front para mostrar as imagens salvas
 app.use('/images', express.static(path.resolve('src/public/images')));
 
-// A quantidade de páginas disponíveis é enviada para o front-end para facilitar a criação dos botões
+// A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
 app.get('/produtos', URLQueryHandler, async (req, res) => {
     try {
         const produtos = await getProdutos(req.query);
@@ -104,12 +103,9 @@ app.get('/produto/:id', async (req, res) => {
 
 app.post('/novo-produto', upload.array('images', 5), async (req, res) => {
     try {
-        let images = [];
-        if (req.files) {
+        let images = ['placeholder.png'];
+        if (req.files && req.files.length !== 0) {
             images = req.files.map((img) => img.filename);
-        }
-        if (images.length === 0) {
-            images.push('placeholder.png');
         }
         const result = await insertProduto({...req.body, images: images});
         res.status(201).send({
@@ -128,7 +124,7 @@ app.put('/produto/:id', upload.single('images'), async (req, res) => {
     try {
         const produto = await getProduto(req.params.id);
         const images = req.files.map((img) => img.filename);
-        await deleteImage(produto);
+        deleteImages(produto);
         await updateProduto({...req.body, images: images});
         res.status(200).send({
                 id: req.params.id,
