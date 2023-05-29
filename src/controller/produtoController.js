@@ -68,11 +68,11 @@ export async function getProdutos(data) {
     });
 };
 
-export async function countProdutos() {
+export async function countProdutos(data) {
     return openDb().then(db => {
         return db.get(
-            `SELECT COUNT() AS size
-            FROM produto;`
+            `SELECT COUNT() AS size FROM produto
+            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''};`
         );
     });
 }

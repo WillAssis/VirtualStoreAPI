@@ -75,11 +75,12 @@ app.use('/images', express.static(path.resolve('src/public/images')));
 app.get('/produtos', URLQueryHandler, async (req, res) => {
     try {
         const produtos = await getProdutos(req.query);
-        const dbLength = await countProdutos();
+        const numberOfResults = await countProdutos(req.query);
         if (produtos.length > 0) {
             res.send({
                 products: produtos,
-                pages: Math.ceil(dbLength.size / req.query.pageSize),
+                results: numberOfResults.size,
+                pages: Math.ceil(numberOfResults.size / req.query.pageSize),
                 currentPage: req.query.page
             });
         } else {
