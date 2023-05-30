@@ -86,7 +86,7 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
                 currentPage: req.query.page
             });
         } else {
-            res.send({});
+            res.status(204).send();
         }
     } catch (error) {
         console.log(error);
@@ -101,7 +101,7 @@ app.get('/produto/:slug', async (req, res) => {
             const produto = formatProduct(result);
             res.status(200).send(produto);
         } else {
-            res.send({});
+            res.status(204).send();
         }
     } catch (error) {
         console.log(error);
@@ -113,7 +113,11 @@ app.get('/destaques', async (req, res) => {
     try {
         const result = await getFeaturedProdutos();
         const produtos = result.map(formatProduct);
-        res.status(200).send(produtos);
+        if (produtos.length > 0) {
+            res.status(200).send(produtos);
+        } else {
+            res.status(204).send();
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();
@@ -132,16 +136,16 @@ app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, as
 });
 
 // TODO: testar o method put
-app.put('/produto/:id', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
+app.put('/produto/:slug', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
+        const produto = await getProduto(req.params.slug);
         if (produto) {
             const images = req.files.map((img) => img.filename);
             deleteImages(JSON.parse(produto));
             await updateProduto({...req.body, images: images});
             res.status(200).send('Produto atualizado');
         } else {
-            res.status(204).send('Produto não existe');
+            res.status(204).send();
         }
     } catch (error) {
         console.log(error);
@@ -157,7 +161,7 @@ app.delete('/produto/:slug', async (req, res) => {
             deleteImages(JSON.parse(produto.images));
             res.status(200).send('Produto deletado');
         } else {
-            res.status(204).send('Produto não existe');
+            res.status(204).send();
         }
     } catch (error) {
         console.log(error);
