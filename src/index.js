@@ -92,9 +92,9 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
     }
 });
 
-app.get('/produto/:id', async (req, res) => {
+app.get('/produto/:slug', async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
+        const produto = await getProduto(req.params.slug);
         res.status(200).send(produto);
     } catch (error) {
         console.log(error);
