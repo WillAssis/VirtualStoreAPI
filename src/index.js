@@ -97,8 +97,12 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
 app.get('/produto/:slug', async (req, res) => {
     try {
         const result = await getProduto(req.params.slug);
-        const produto = formatProduct(result);
-        res.status(200).send(produto);
+        if (result) {
+            const produto = formatProduct(result);
+            res.status(200).send(produto);
+        } else {
+            res.send({});
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();
@@ -120,11 +124,7 @@ app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, as
     try {
         const images = req.files.map((img) => img.filename);
         const result = await insertProduto({...req.body, images: images});
-        res.status(201).send({
-            id: result.lastID,
-            ...req.body,
-            images
-        });
+        res.status(201).send('Produto criado');
     } catch (error) {
         console.log(error);
         res.status(204).send();
@@ -132,17 +132,17 @@ app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, as
 });
 
 // TODO: testar o method put
-app.put('/produto/:id', imageUpload.array('images', 5), async (req, res) => {
+app.put('/produto/:id', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
     try {
         const produto = await getProduto(req.params.id);
-        const images = req.files.map((img) => img.filename);
-        deleteImages(JSON.parse(produto));
-        await updateProduto({...req.body, images: images});
-        res.status(200).send({
-                id: req.params.id,
-                ...req.body,
-                images
-        });
+        if (produto) {
+            const images = req.files.map((img) => img.filename);
+            deleteImages(JSON.parse(produto));
+            await updateProduto({...req.body, images: images});
+            res.status(200).send('Produto atualizado');
+        } else {
+            res.status(204).send('Produto não existe');
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();

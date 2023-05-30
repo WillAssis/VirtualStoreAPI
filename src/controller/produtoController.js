@@ -8,6 +8,7 @@ import { openDb } from "../configDb.js";
  *      a conversão de valores e resultar em 2 casas decimais.
  * TODO:
  *      -> Normalização
+ *      -> Slugs diferentes para nomes duplicados
  */
 
 export async function createProductTable() {
