@@ -19,6 +19,8 @@ const productBodyHandler = (req, res, next) => {
             req.files = [{filename: 'placeholder.png'}];
         }
 
+        req.body.featured = (req.body.featured) ? 1 : 0;
+
         next();
     } catch (error) {
         res.status(204).send(error);

@@ -8,8 +8,7 @@ import formatProduct from "../utils/formatProduct.js";
  *      -> O preço dos produtos é multiplicado por 100 e transformado em integer para facilitar
  *      a conversão de valores e resultar em 2 casas decimais.
  * TODO:
- *      -> Criar uma nova tabela para armazenar os nomes das imagens em cada coluna, com uma
- *      foreign key para o id de um produto em cada instância
+ *      -> Normalização
  */
 
 export async function createProductTable() {
@@ -21,7 +20,8 @@ export async function createProductTable() {
                 name            VARCHAR(100),
                 description     VARCHAR(100),
                 price           INTEGER,
-                images          VARCHAR(256)
+                images          VARCHAR(256),
+                featured        INTEGER         DEFAULT         0
             )`
         );
     });
@@ -30,15 +30,16 @@ export async function createProductTable() {
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(
-            `INSERT INTO produto (slug, name, description, price, images)
-            VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO produto (slug, name, description, price, images, featured)
+            VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
                 produto.name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
                 produto.name,
                 produto.description,
                 Math.round(produto.price*100),
-                JSON.stringify(produto.images)
+                JSON.stringify(produto.images),
+                produto.featured
             ]
         );
     });
@@ -48,7 +49,7 @@ export async function getProduto(slug) {
     console.log(slug);
     return openDb().then(db => {
         return db.get(
-            `SELECT slug, name, description, price, images FROM produto
+            `SELECT slug, name, description, price, images, featured FROM produto
             WHERE produto.slug == '${slug}';`
         ).then(res => formatProduct(res));
     });
@@ -58,7 +59,7 @@ export async function updateProduto(produto) {
     openDb().then(db => {
         db.run(
             `UPDATE produto
-            SET slug=?, name=?, description=?, price=?, images=?
+            SET slug=?, name=?, description=?, price=?, images=?, featured=?
             WHERE id=?`,
             [
                 // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
@@ -66,7 +67,8 @@ export async function updateProduto(produto) {
                 produto.name,
                 produto.description,
                 Math.round(produto.price*100),
-                JSON.stringify(produto.images)
+                JSON.stringify(produto.images),
+                produto.featured
             ]
         );
     });
@@ -75,7 +77,7 @@ export async function updateProduto(produto) {
 export async function getProdutos(data) {
     return openDb().then(db => {
         return db.all(
-            `SELECT slug, name, description, price, images FROM produto
+            `SELECT slug, name, description, price, images, featured FROM produto
             ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''}
             ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
             LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
@@ -83,6 +85,16 @@ export async function getProdutos(data) {
             .then(res => res.map((produto) => formatProduct(produto)));
     });
 };
+
+export async function getFeaturedProdutos() {
+    return openDb().then(db => {
+        return db.all(
+            `SELECT slug, name, description, price, images, featured FROM produto
+            WHERE produto.featured == 1;`
+        )
+            .then(res => res.map((produto) => formatProduct(produto)));
+    });
+}
 
 export async function countProdutos(data) {
     return openDb().then(db => {

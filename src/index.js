@@ -5,7 +5,7 @@ import upload from './middlewares/formHandler.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
 import productBodyHandler from './middlewares/productBodyHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
-import { countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
+import { getFeaturedProdutos, countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
 
 const app = express();
@@ -84,7 +84,7 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
                 currentPage: req.query.page
             });
         } else {
-            res.send('Sem resultados');
+            res.send({});
         }
     } catch (error) {
         console.log(error);
@@ -96,6 +96,16 @@ app.get('/produto/:slug', async (req, res) => {
     try {
         const produto = await getProduto(req.params.slug);
         res.status(200).send(produto);
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+app.get('/destaques', async (req, res) => {
+    try {
+        const produtos = await getFeaturedProdutos();
+        res.status(200).send(produtos);
     } catch (error) {
         console.log(error);
         res.status(204).send();

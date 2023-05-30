@@ -5,7 +5,8 @@ const formatProduct = (query) => {
         name: query.name,
         description: query.description,
         price: query.price/100,
-        images: JSON.parse(query.images)
+        images: JSON.parse(query.images),
+        featured: Boolean(query.featured)
     }
 }
 
