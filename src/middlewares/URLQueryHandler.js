@@ -1,6 +1,5 @@
 /**
- * Faz as alterações dos dados de uma query para a lista de produtos para evitar erros
- * (e SQL Injection?) quando usados no banco de dados.
+ * Faz as alterações dos dados de uma query para evitar erros quando usados no banco de dados.
  * 
  *      Um exemplo de query feita: /produtos?page=2&orderBy=name&search=produto%20123
  *      Variáveis da query:
@@ -14,7 +13,7 @@ const URLQueryHandler = (req, res, next) => {
         req.query.pageSize = 12; // Valor fixo para número de itens retornados
         
         if (req.query.page) {
-            const page = parseInt(req.query.page); // Pode gerar valor NaN
+            const page = parseInt(req.query.page);
             if (Number.isInteger(page) && page > 0) {
                 req.query.page = page;
             } else {
@@ -31,9 +30,10 @@ const URLQueryHandler = (req, res, next) => {
             req.query.orderBy = null;
         }
 
-        // TODO: verificar as pesquisas
-        const search = req.query.search;
-        req.query.search = (search) ? search : null;
+        // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados
+        req.query.search = (req.query.search)
+            ? req.query.search.toLowerCase().replace(/[^a-zA-Z0-9 -]/g, '').replace(/\s+/g, ' ')
+            : null;
 
         next();
     } catch (error) {
