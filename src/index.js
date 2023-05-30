@@ -7,6 +7,7 @@ import productBodyHandler from './middlewares/productBodyHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { getFeaturedProdutos, countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
+import formatProduct from './utils/formatProduct.js';
 
 const app = express();
 
@@ -74,8 +75,9 @@ app.use('/images', express.static(path.resolve('src/public/images')));
 // A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
 app.get('/produtos', URLQueryHandler, async (req, res) => {
     try {
-        const produtos = await getProdutos(req.query);
+        const result = await getProdutos(req.query);
         const numberOfResults = await countProdutos(req.query);
+        const produtos = result.map(formatProduct);
         if (produtos.length > 0) {
             res.send({
                 products: produtos,
@@ -94,7 +96,8 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
 
 app.get('/produto/:slug', async (req, res) => {
     try {
-        const produto = await getProduto(req.params.slug);
+        const result = await getProduto(req.params.slug);
+        const produto = formatProduct(result);
         res.status(200).send(produto);
     } catch (error) {
         console.log(error);
@@ -104,7 +107,8 @@ app.get('/produto/:slug', async (req, res) => {
 
 app.get('/destaques', async (req, res) => {
     try {
-        const produtos = await getFeaturedProdutos();
+        const result = await getFeaturedProdutos();
+        const produtos = result.map(formatProduct);
         res.status(200).send(produtos);
     } catch (error) {
         console.log(error);

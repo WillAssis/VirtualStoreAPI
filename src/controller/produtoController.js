@@ -1,5 +1,4 @@
 import { openDb } from "../configDb.js";
-import formatProduct from "../utils/formatProduct.js";
 
 /**
  * Gambiarras:
@@ -46,12 +45,11 @@ export async function insertProduto(produto) {
 };
 
 export async function getProduto(slug) {
-    console.log(slug);
     return openDb().then(db => {
         return db.get(
             `SELECT slug, name, description, price, images, featured FROM produto
             WHERE produto.slug == '${slug}';`
-        ).then(res => formatProduct(res));
+        );
     });
 };
 
@@ -81,8 +79,7 @@ export async function getProdutos(data) {
             ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''}
             ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
             LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
-        )
-            .then(res => res.map((produto) => formatProduct(produto)));
+        );
     });
 };
 
@@ -91,8 +88,7 @@ export async function getFeaturedProdutos() {
         return db.all(
             `SELECT slug, name, description, price, images, featured FROM produto
             WHERE produto.featured == 1;`
-        )
-            .then(res => res.map((produto) => formatProduct(produto)));
+        );
     });
 }
 
@@ -110,9 +106,6 @@ export async function deleteProduto(id) {
         return db.get(
             `DELETE FROM produto
             WHERE id == ${id};`
-        )
-            .then(res => {
-                res
-            });
+        );
     });
 };
