@@ -1,11 +1,13 @@
-// Função de utilidade para formatar os dados de uma query no banco de dados dos produtos
+// Função de utilidade para formatar os dados de uma query no banco de dados dos
+// produtos antes de enviar ao client
 const formatProduct = (query) => {
     return {
-        id: query.id,
+        slug: query.slug,
         name: query.name,
         description: query.description,
         price: query.price/100,
-        images: JSON.parse(query.images)
+        images: JSON.parse(query.images),
+        featured: Boolean(query.featured)
     }
 }
 

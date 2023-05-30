@@ -1,6 +1,6 @@
 // Faz verificações a alterações na informações enviadas por formulário
 
-const productBodyHandler = (req, res, next) => {
+const productFormHandler = (req, res, next) => {
     try {
         if (!req.body.name) {
             throw new Error('Nome é obrigatório');
@@ -17,7 +17,11 @@ const productBodyHandler = (req, res, next) => {
 
         if (!req.files || req.files.length === 0) {
             req.files = [{filename: 'placeholder.png'}];
+        } else if (req.files.length > 5) {
+            throw new Error('Máximo 5 arquivos');
         }
+        
+        req.body.featured = (req.body.featured) ? 1 : 0;
 
         next();
     } catch (error) {
@@ -25,4 +29,4 @@ const productBodyHandler = (req, res, next) => {
     }
 }
 
-export default productBodyHandler;
+export default productFormHandler;

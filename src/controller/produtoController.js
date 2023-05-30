@@ -1,5 +1,4 @@
 import { openDb } from "../configDb.js";
-import formatProduct from "../utils/formatProduct.js";
 
 /**
  * Gambiarras:
@@ -8,8 +7,8 @@ import formatProduct from "../utils/formatProduct.js";
  *      -> O preço dos produtos é multiplicado por 100 e transformado em integer para facilitar
  *      a conversão de valores e resultar em 2 casas decimais.
  * TODO:
- *      -> Criar uma nova tabela para armazenar os nomes das imagens em cada coluna, com uma
- *      foreign key para o id de um produto em cada instância
+ *      -> Normalização
+ *      -> Slugs diferentes para nomes duplicados
  */
 
 export async function createProductTable() {
@@ -17,10 +16,12 @@ export async function createProductTable() {
         db.exec(
             `CREATE TABLE IF NOT EXISTS produto (
                 id              INTEGER         PRIMARY KEY,
+                slug            VARCHAR(100),
                 name            VARCHAR(100),
                 description     VARCHAR(100),
                 price           INTEGER,
-                images          VARCHAR(256)
+                images          VARCHAR(256),
+                featured        INTEGER         DEFAULT         0
             )`
         );
     });
@@ -29,19 +30,27 @@ export async function createProductTable() {
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(
-            `INSERT INTO produto (name, description, price, images)
-            VALUES (?, ?, ?, ?)`,
-            [produto.name, produto.description, Math.round(produto.price*100), JSON.stringify(produto.images)]
+            `INSERT INTO produto (slug, name, description, price, images, featured)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
+                produto.name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
+                produto.name,
+                produto.description,
+                Math.round(produto.price*100),
+                JSON.stringify(produto.images),
+                produto.featured
+            ]
         );
     });
 };
 
-export async function getProduto(id) {
+export async function getProduto(slug) {
     return openDb().then(db => {
         return db.get(
-            `SELECT * FROM produto
-            WHERE produto.id == ${id}`
-        ).then(res => formatProduct(res));
+            `SELECT slug, name, description, price, images, featured FROM produto
+            WHERE produto.slug == '${slug}';`
+        );
     });
 };
 
@@ -49,9 +58,17 @@ export async function updateProduto(produto) {
     openDb().then(db => {
         db.run(
             `UPDATE produto
-            SET name=?, description=?, price=?, images=?
+            SET slug=?, name=?, description=?, price=?, images=?, featured=?
             WHERE id=?`,
-            [produto.name, produto.description, Math.round(produto.price*100), JSON.stringify(produto.images)]
+            [
+                // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
+                produto.name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
+                produto.name,
+                produto.description,
+                Math.round(produto.price*100),
+                JSON.stringify(produto.images),
+                produto.featured
+            ]
         );
     });
 };
@@ -59,32 +76,37 @@ export async function updateProduto(produto) {
 export async function getProdutos(data) {
     return openDb().then(db => {
         return db.all(
-            `SELECT * FROM produto
-            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''}
+            `SELECT slug, name, description, price, images, featured FROM produto
+            ${(data.search) ? `WHERE LOWER(name) LIKE '%${data.search}%'` : ''}
             ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
             LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
-        )
-            .then(res => res.map((produto) => formatProduct(produto)));
+        );
     });
 };
+
+export async function getFeaturedProdutos() {
+    return openDb().then(db => {
+        return db.all(
+            `SELECT slug, name, description, price, images, featured FROM produto
+            WHERE produto.featured == 1;`
+        );
+    });
+}
 
 export async function countProdutos(data) {
     return openDb().then(db => {
         return db.get(
             `SELECT COUNT() AS size FROM produto
-            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''};`
+            ${(data.search) ? `WHERE LOWER(name) LIKE '%${data.search}%'` : ''};`
         );
     });
 }
 
-export async function deleteProduto(id) {
+export async function deleteProduto(slug) {
     return openDb().then(db => {
         return db.get(
             `DELETE FROM produto
-            WHERE id == ${id}`
-        )
-            .then(res => {
-                res
-            });
+            WHERE slug == '${slug}';`
+        );
     });
 };

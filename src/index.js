@@ -1,12 +1,13 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
-import upload from './middlewares/formHandler.js';
+import imageUpload from './middlewares/imageUpload.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
-import productBodyHandler from './middlewares/productBodyHandler.js';
+import productFormHandler from './middlewares/productFormHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
-import { countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
+import { getFeaturedProdutos, countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
+import formatProduct from './utils/formatProduct.js';
 
 const app = express();
 
@@ -74,8 +75,9 @@ app.use('/images', express.static(path.resolve('src/public/images')));
 // A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
 app.get('/produtos', URLQueryHandler, async (req, res) => {
     try {
-        const produtos = await getProdutos(req.query);
+        const result = await getProdutos(req.query);
         const numberOfResults = await countProdutos(req.query);
+        const produtos = result.map(formatProduct);
         if (produtos.length > 0) {
             res.send({
                 products: produtos,
@@ -84,7 +86,7 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
                 currentPage: req.query.page
             });
         } else {
-            res.send('Sem resultados');
+            res.status(204).send();
         }
     } catch (error) {
         console.log(error);
@@ -92,25 +94,41 @@ app.get('/produtos', URLQueryHandler, async (req, res) => {
     }
 });
 
-app.get('/produto/:id', async (req, res) => {
+app.get('/produto/:slug', async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
-        res.status(200).send(produto);
+        const result = await getProduto(req.params.slug);
+        if (result) {
+            const produto = formatProduct(result);
+            res.status(200).send(produto);
+        } else {
+            res.status(204).send();
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();
     }
 });
 
-app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (req, res) => {
+app.get('/destaques', async (req, res) => {
+    try {
+        const result = await getFeaturedProdutos();
+        const produtos = result.map(formatProduct);
+        if (produtos.length > 0) {
+            res.status(200).send(produtos);
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
     try {
         const images = req.files.map((img) => img.filename);
         const result = await insertProduto({...req.body, images: images});
-        res.status(201).send({
-            id: result.lastID,
-            ...req.body,
-            images
-        });
+        res.status(201).send('Produto criado');
     } catch (error) {
         console.log(error);
         res.status(204).send();
@@ -118,29 +136,33 @@ app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (
 });
 
 // TODO: testar o method put
-app.put('/produto/:id', upload.single('images'), async (req, res) => {
+app.put('/produto/:slug', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
-        const images = req.files.map((img) => img.filename);
-        deleteImages(produto);
-        await updateProduto({...req.body, images: images});
-        res.status(200).send({
-                id: req.params.id,
-                ...req.body,
-                images
-        });
+        const produto = await getProduto(req.params.slug);
+        if (produto) {
+            const images = req.files.map((img) => img.filename);
+            deleteImages(JSON.parse(produto));
+            await updateProduto({...req.body, images: images});
+            res.status(200).send('Produto atualizado');
+        } else {
+            res.status(204).send();
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();
     }
 });
 
-app.delete('/produto/:id', async (req, res) => {
+app.delete('/produto/:slug', async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
-        await deleteProduto(req.params.id);
-        deleteImages(produto.images);
-        res.status(200).send('Produto deletado');
+        const produto = await getProduto(req.params.slug);
+        if (produto) {
+            await deleteProduto(req.params.slug);
+            deleteImages(JSON.parse(produto.images));
+            res.status(200).send('Produto deletado');
+        } else {
+            res.status(204).send();
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();
