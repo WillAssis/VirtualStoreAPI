@@ -1,9 +1,9 @@
 // import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
-import upload from './middlewares/formHandler.js';
+import imageUpload from './middlewares/imageUpload.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
-import productBodyHandler from './middlewares/productBodyHandler.js';
+import productFormHandler from './middlewares/productFormHandler.js';
 import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
 import { getFeaturedProdutos, countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
@@ -116,7 +116,7 @@ app.get('/destaques', async (req, res) => {
     }
 });
 
-app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (req, res) => {
+app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
     try {
         const images = req.files.map((img) => img.filename);
         const result = await insertProduto({...req.body, images: images});
@@ -132,7 +132,7 @@ app.post('/novo-produto', upload.array('images', 5), productBodyHandler, async (
 });
 
 // TODO: testar o method put
-app.put('/produto/:id', upload.single('images'), async (req, res) => {
+app.put('/produto/:id', imageUpload.array('images', 5), async (req, res) => {
     try {
         const produto = await getProduto(req.params.id);
         const images = req.files.map((img) => img.filename);
