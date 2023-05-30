@@ -136,7 +136,7 @@ app.put('/produto/:id', imageUpload.array('images', 5), async (req, res) => {
     try {
         const produto = await getProduto(req.params.id);
         const images = req.files.map((img) => img.filename);
-        deleteImages(produto);
+        deleteImages(JSON.parse(produto));
         await updateProduto({...req.body, images: images});
         res.status(200).send({
                 id: req.params.id,
@@ -149,12 +149,16 @@ app.put('/produto/:id', imageUpload.array('images', 5), async (req, res) => {
     }
 });
 
-app.delete('/produto/:id', async (req, res) => {
+app.delete('/produto/:slug', async (req, res) => {
     try {
-        const produto = await getProduto(req.params.id);
-        await deleteProduto(req.params.id);
-        deleteImages(produto.images);
-        res.status(200).send('Produto deletado');
+        const produto = await getProduto(req.params.slug);
+        if (produto) {
+            await deleteProduto(req.params.slug);
+            deleteImages(JSON.parse(produto.images));
+            res.status(200).send('Produto deletado');
+        } else {
+            res.status(204).send('Produto não existe');
+        }
     } catch (error) {
         console.log(error);
         res.status(204).send();

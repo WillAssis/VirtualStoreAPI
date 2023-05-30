@@ -76,7 +76,7 @@ export async function getProdutos(data) {
     return openDb().then(db => {
         return db.all(
             `SELECT slug, name, description, price, images, featured FROM produto
-            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''}
+            ${(data.search) ? `WHERE LOWER(name) LIKE '%${data.search}%'` : ''}
             ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
             LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
         );
@@ -96,16 +96,16 @@ export async function countProdutos(data) {
     return openDb().then(db => {
         return db.get(
             `SELECT COUNT() AS size FROM produto
-            ${(data.search) ? `WHERE name LIKE '%${data.search}%'` : ''};`
+            ${(data.search) ? `WHERE LOWER(name) LIKE '%${data.search}%'` : ''};`
         );
     });
 }
 
-export async function deleteProduto(id) {
+export async function deleteProduto(slug) {
     return openDb().then(db => {
         return db.get(
             `DELETE FROM produto
-            WHERE id == ${id};`
+            WHERE slug == '${slug}';`
         );
     });
 };
