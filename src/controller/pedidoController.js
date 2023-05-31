@@ -8,7 +8,6 @@ export async function createPedidoTable() {
             `CREATE TABLE IF NOT EXISTS pedido (
                 id              INTEGER         PRIMARY KEY,
                 cliente_id      INTEGER,
-                data_pedido     DATE,
                 FOREIGN KEY (cliente_id) REFERENCES cliente(id)
             )`
         );
@@ -24,8 +23,26 @@ export async function getAllPedidos() {
     })
 };
 
+export async function getPedidosFromClient(clienteId) {
+    const client = await getClient(clienteId);
+
+    if (!client) {
+        throw {
+            statusCode: 400,
+            message: 'Não foi encontrado nenhum cliente com o ID informado'
+        }
+    };
+
+    return openDb().then(db => {
+        return db.get(`
+        SELECT p FROM pedido WHERE p.cliente_id== ${clienteId}
+        `)
+            .then(res => res);
+    });
+};
+
 export async function insertPedido(pedido) {
-    const { clienteId, dataPedido, produtos } = pedido;
+    const { clienteId, produtos } = pedido;
     const client = await getClient(clienteId);
 
     if (!client) {
@@ -35,21 +52,30 @@ export async function insertPedido(pedido) {
         }
     }
 
-    const pedidoResult = openDb().then(db => async () => {
+    const pedidoResult = await Promise.resolve(openDb().then(db => {
         return db.run(`
-            INSERT INTO pedido (cliente_id, data_pedido)
-            VALUES (${clienteId}, ${dataPedido})
+            INSERT INTO pedido (cliente_id)
+            VALUES (${clienteId})
         `, (err, result) => {
             if (err) {
                 return error.message;
             }
             return result;
         });
-    });
+    }));
 
-    for (pedido of pedidos) {
-        await createProdutoPedido({pedidoId: pedidoResult.lastID, ...pedido});
+    for (let produto of produtos) {
+        await createProdutoPedido({pedidoId: pedidoResult.lastID, ...produto});
     }
 
     return pedidoResult;
+};
+
+export async function deletePedido(pedidoId) {
+    openDb().then(db => {
+        db.run(`
+            DELETE FROM pedido
+            WHERE  id = ${pedidoId}
+        `)
+    })
 }

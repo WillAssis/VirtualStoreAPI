@@ -37,7 +37,6 @@ Desenvolver o back-end de um sistema web de vitrine virtual para a exibição do
 Na criação de pedidos, teremos uma API que recebe em seu body:
 
 - O id do cliente realizando o pedido;
-- A data de criação do pedido (formatos aceitos pelo sqlite [aqui](https://www.sqlite.org/lang_datefunc.html), no tópico 2);
 - Um array com os pedidos, onde cada um deve conter:
   - A quantidade de itens;
   - O id do produto.

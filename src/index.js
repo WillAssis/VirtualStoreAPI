@@ -18,8 +18,8 @@ import {
     updateProduto
 } from './controller/produtoController.js';
 import deleteImage from './utils/deleteImage.js';
-import { createPedidoTable, getAllPedidos, insertPedido } from './controller/pedidoController.js'
-import { createProdutoPedidoTable } from './controller/produtoPedidoController.js';
+import { createPedidoTable, deletePedido, getAllPedidos, getPedidosFromClient, insertPedido } from './controller/pedidoController.js'
+import { createProdutoPedidoTable, getAllProdutosFromPedido, updatePedido } from './controller/produtoPedidoController.js';
 
 const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
@@ -58,7 +58,7 @@ app.post('/cliente', async (req, res) => {
     const result = await insertClient(cliente)
     res.status(201).send({
         id: result.lastID,
-        cliente
+        ...cliente
     });
 });
 
@@ -113,11 +113,11 @@ app.get('/produto/:id', async (req, res) => {
  * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
  */
 app.post('/new-product', upload.single('produto-image'), async (req, res) => {
-    const result = await insertProduto({...req.body, image: req.file.path});
+    const result = await insertProduto({...req.body.produto, image: req.file?.path});
     res.status(201).send({
         id: result.lastID,
         ...req.body,
-        image: `images/${req.file.filename}`
+        image: `images/${req.file?.filename}`
     });
 });
 
@@ -154,15 +154,50 @@ app.get('/pedido', async (req, res) => {
 
 app.post('/pedido', async (req, res) => {
     const { pedido } = req.body;
-    console.log(pedido)
 
     try {
-        const result = await insertPedido(pedido);
-        console.log(result)
+        let result = await insertPedido(pedido);
         res.status(201).send({ id: result.lastID, ...pedido });
     } catch (e) {
         res.status(e.statusCode || 400).send(e.message)
     }
 });
+
+app.get('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    const produtos = await getAllProdutosFromPedido(pedidoId);
+    
+    if (!produtos.length) {
+        res.status(204).send();
+    } else {
+        res.send(produtos);
+    }
+})
+
+app.get('/pedido/cliente/:clienteId', async (req, res) => {
+    const { clienteId } = req.params;
+    try {
+        const pedidos = await getPedidosFromClient(clienteId);
+        res.send(pedidos);
+    } catch (e) {
+        res.status(e.statusCode || 400).send(e.message);
+    }
+})
+
+app.put('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    const { produtos } = req.body;
+
+    await updatePedido(pedidoId, produtos);
+
+    res.send('Pedido atualizado');
+})
+
+app.delete('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    await deletePedido(pedidoId);
+
+    res.send('Pedido removido!');
+})
 
 app.listen(3333, () => console.log('http://localhost:3333'));

@@ -14,7 +14,7 @@ export async function createProdutoPedidoTable() {
             )
         `)
     })
-}
+};
 
 export async function createProdutoPedido(produtoPedido) {
     const { produtoId, pedidoId, quantidade } = produtoPedido;
@@ -26,10 +26,38 @@ export async function createProdutoPedido(produtoPedido) {
             message: 'Não foi encontrado nenhum produto com o ID informado'
         }
     }
+
     openDb().then(db => {
         db.exec(`
             INSERT INTO produto_pedido(produto_id, pedido_id, quantidade)
             VALUES(${produtoId}, ${pedidoId}, ${quantidade})
         `)
     })
+};
+
+export async function getAllProdutosFromPedido(pedidoId) {
+    return openDb().then(db => {
+        return db.all(`
+            SELECT produto.name, produto.price, produto.image, p.quantidade, p.pedido_id
+            FROM produto
+            INNER JOIN produto_pedido p
+            ON produto.id == p.produto_id
+            AND pedido_id == ${pedidoId}
+        `)
+            .then(res => res);
+    });
+};
+
+export async function updatePedido(pedidoId, produtos) {
+    for (let produto of produtos) {
+        const { produtoId, quantidade } = produto 
+        openDb().then(db => {
+            db.all(`
+                UPDATE produto_pedido
+                SET quantidade = ${quantidade}
+                WHERE pedido_id = ${pedidoId}
+                AND produto_id = ${produtoId}
+            `)
+        })
+    }
 }
