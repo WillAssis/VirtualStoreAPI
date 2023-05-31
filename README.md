@@ -31,6 +31,17 @@ Desenvolver o back-end de um sistema web de vitrine virtual para a exibição do
   - Digite o comando <code style="margin-left:40px">npm start</code> para rodar o projeto
   - Abra outro terminal
   - Digite o comando <code style="margin-left:40px">http localhost:3333</code> para testar o projeto rodando
+
+## Criação de Pedidos
+
+Na criação de pedidos, teremos uma API que recebe em seu body:
+
+- O id do cliente realizando o pedido;
+- Um array com os pedidos, onde cada um deve conter:
+  - A quantidade de itens;
+  - O id do produto.
+
+Não será necessário realizar o envio de todos os dados dos produtos.
   
 ## Status
 

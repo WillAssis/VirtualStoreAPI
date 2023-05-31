@@ -1,19 +1,40 @@
-// import { openDb } from './configDb.js';
 import express from 'express';
 import path from 'path';
 import imageUpload from './middlewares/imageUpload.js';
 import URLQueryHandler from './middlewares/URLQueryHandler.js';
 import productFormHandler from './middlewares/productFormHandler.js';
-import { createTable, deleteClient, getAllClients, getClient, insertClient, updateClient } from './controller/clienteController.js';
-import { getFeaturedProdutos, countProdutos, createProductTable, deleteProduto, getProdutos, getProduto, insertProduto, updateProduto } from './controller/produtoController.js';
+import {
+    createTable,
+    deleteClient,
+    getAllClients,
+    getClient,
+    insertClient,
+    updateClient
+} from './controller/clienteController.js';
+import { getFeaturedProdutos, countProdutos,
+    createProductTable,
+    deleteProduto,
+    getProdutos,
+    getProduto,
+    insertProduto,
+    updateProduto
+} from './controller/produtoController.js';
 import deleteImages from './utils/deleteImage.js';
 import formatProduct from './utils/formatProduct.js';
+import { createPedidoTable, deletePedido, getAllPedidos, getPedidosFromClient, insertPedido } from './controller/pedidoController.js'
+import { createProdutoPedidoTable, getAllProdutosFromPedido, updatePedido } from './controller/produtoPedidoController.js';
 
 const app = express();
 
 app.use(express.json());
 
-createTable();
+// Usado pelas tags <img> no HTML para mostrar as imagens salvas
+app.use('/images', express.static(path.resolve('src/public/images')));
+
+await createTable();
+await createProductTable();
+await createPedidoTable();
+await createProdutoPedidoTable();
 
 app.get('/', (req, res) => {
     res.send('Bem vindo ao nosso Projeto :)');
@@ -26,14 +47,20 @@ app.get('/cliente', async (req, res) => {
 
 app.get('/cliente/:id', async (req, res) => {
     const result = await getClient(req.params.id);
-    res.status(200).send(result);
+    if (!result) {
+        res.status(204).send();
+    }
+    if (result) {
+        res.status(200).send(result);
+    }
 });
 
 app.post('/cliente', async (req, res) => {
-    const result = await insertClient(req.body)
+    const { cliente } = req.body;
+    const result = await insertClient(cliente)
     res.status(201).send({
         id: result.lastID,
-        ...req.body
+        ...cliente
     });
 });
 
@@ -168,5 +195,59 @@ app.delete('/produto/:slug', async (req, res) => {
         res.status(204).send();
     }
 });
+
+app.get('/pedido', async (req, res) => {
+    const pedidos = await getAllPedidos();
+
+    res.send(pedidos);
+});
+
+app.post('/pedido', async (req, res) => {
+    const { pedido } = req.body;
+
+    try {
+        let result = await insertPedido(pedido);
+        res.status(201).send({ id: result.lastID, ...pedido });
+    } catch (e) {
+        res.status(e.statusCode || 400).send(e.message)
+    }
+});
+
+app.get('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    const produtos = await getAllProdutosFromPedido(pedidoId);
+    
+    if (!produtos.length) {
+        res.status(204).send();
+    } else {
+        res.send(produtos);
+    }
+})
+
+app.get('/pedido/cliente/:clienteId', async (req, res) => {
+    const { clienteId } = req.params;
+    try {
+        const pedidos = await getPedidosFromClient(clienteId);
+        res.send(pedidos);
+    } catch (e) {
+        res.status(e.statusCode || 400).send(e.message);
+    }
+})
+
+app.put('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    const { produtos } = req.body;
+
+    await updatePedido(pedidoId, produtos);
+
+    res.send('Pedido atualizado');
+})
+
+app.delete('/pedido/:pedidoId', async (req, res) => {
+    const { pedidoId } = req.params;
+    await deletePedido(pedidoId);
+
+    res.send('Pedido removido!');
+})
 
 app.listen(3333, () => console.log('http://localhost:3333'));
