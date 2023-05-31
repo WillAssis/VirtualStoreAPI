@@ -1,6 +1,8 @@
 import express from 'express';
 import path from 'path';
-import multer from 'multer';
+import imageUpload from './middlewares/imageUpload.js';
+import URLQueryHandler from './middlewares/URLQueryHandler.js';
+import productFormHandler from './middlewares/productFormHandler.js';
 import {
     createTable,
     deleteClient,
@@ -9,19 +11,19 @@ import {
     insertClient,
     updateClient
 } from './controller/clienteController.js';
-import {
+import { getFeaturedProdutos, countProdutos,
     createProductTable,
     deleteProduto,
-    getAllProdutos,
+    getProdutos,
     getProduto,
     insertProduto,
     updateProduto
 } from './controller/produtoController.js';
-import deleteImage from './utils/deleteImage.js';
+import deleteImages from './utils/deleteImage.js';
+import formatProduct from './utils/formatProduct.js';
 import { createPedidoTable, deletePedido, getAllPedidos, getPedidosFromClient, insertPedido } from './controller/pedidoController.js'
 import { createProdutoPedidoTable, getAllProdutosFromPedido, updatePedido } from './controller/produtoPedidoController.js';
 
-const upload = multer({ dest: path.resolve('src/public/images') });
 const app = express();
 
 app.use(express.json());
@@ -35,7 +37,7 @@ await createPedidoTable();
 await createProdutoPedidoTable();
 
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve('src/public/', 'form.html'));
+    res.send('Bem vindo ao nosso Projeto :)');
 });
 
 app.get('/cliente', async (req, res) => {
@@ -87,61 +89,109 @@ app.delete('/cliente/:id', async (req, res) => {
 });
 
 /**
- * Os diretórios absolutos das imagens salvas no banco de dados são substituídos pelo
- * padrão 'images/[nome da imagem]' quando enviados para o client side
+ * TODO:
+ *      -> Fazer verificações relacionadas à segurança;
+ *      -> Criar autenticação para as operações de post, put e delete.
  */
-app.get('/produtos', async (req, res) => {
-    const produtos = await getAllProdutos();
-    produtos.forEach((produto) => {
-        produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
-    });
-    res.send(produtos);
-});
 
-app.get('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    produto.image = produto.image.replace(path.resolve('src/public') + '/', '');
-    res.status(200).send(produto);
-});
+createProductTable();
 
-/**
- * O multer permite ver as informações enviadas por formulário
- * 
- * req.body mostra informações textuais
- * req.file mostra informações da imagem enviada
- * 
- * as imagens são salvas automaticamente em ./public/images e seu path no banco de dados
- */
-app.post('/new-product', upload.single('produto-image'), async (req, res) => {
-    const result = await insertProduto({...req.body.produto, image: req.file?.path});
-    res.status(201).send({
-        id: result.lastID,
-        ...req.body,
-        image: `images/${req.file?.filename}`
-    });
-});
+// Usado pelas tags <img> no front para mostrar as imagens salvas
+app.use('/images', express.static(path.resolve('src/public/images')));
 
-app.put('/produto/:id', upload.single('produto-image'), async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
-        await updateProduto({...req.body, image: req.file.path});
-        await deleteImage(produto);
-        res.status(200).send({
-            id: req.params.id,
-            ...req.body
-        });
-    } else {
+// A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
+app.get('/produtos', URLQueryHandler, async (req, res) => {
+    try {
+        const result = await getProdutos(req.query);
+        const numberOfResults = await countProdutos(req.query);
+        const produtos = result.map(formatProduct);
+        if (produtos.length > 0) {
+            res.send({
+                products: produtos,
+                results: numberOfResults.size,
+                pages: Math.ceil(numberOfResults.size / req.query.pageSize),
+                currentPage: req.query.page
+            });
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });
 
-app.delete('/produto/:id', async (req, res) => {
-    const produto = await getProduto(req.params.id);
-    if (produto) {
-        await deleteProduto(req.params.id);
-        await deleteImage(produto);
-        res.status(200).send('Produto deletado');
-    } else {
+app.get('/produto/:slug', async (req, res) => {
+    try {
+        const result = await getProduto(req.params.slug);
+        if (result) {
+            const produto = formatProduct(result);
+            res.status(200).send(produto);
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+app.get('/destaques', async (req, res) => {
+    try {
+        const result = await getFeaturedProdutos();
+        const produtos = result.map(formatProduct);
+        if (produtos.length > 0) {
+            res.status(200).send(produtos);
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+app.post('/novo-produto', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
+    try {
+        const images = req.files.map((img) => img.filename);
+        const result = await insertProduto({...req.body, images: images});
+        res.status(201).send('Produto criado');
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+// TODO: testar o method put
+app.put('/produto/:slug', imageUpload.array('images', 5), productFormHandler, async (req, res) => {
+    try {
+        const produto = await getProduto(req.params.slug);
+        if (produto) {
+            const images = req.files.map((img) => img.filename);
+            deleteImages(JSON.parse(produto));
+            await updateProduto({...req.body, images: images});
+            res.status(200).send('Produto atualizado');
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+app.delete('/produto/:slug', async (req, res) => {
+    try {
+        const produto = await getProduto(req.params.slug);
+        if (produto) {
+            await deleteProduto(req.params.slug);
+            deleteImages(JSON.parse(produto.images));
+            res.status(200).send('Produto deletado');
+        } else {
+            res.status(204).send();
+        }
+    } catch (error) {
+        console.log(error);
         res.status(204).send();
     }
 });
