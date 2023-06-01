@@ -2,7 +2,7 @@
 
 const productFormHandler = (req, res, next) => {
     try {
-        if (!req.body.name) {
+        if (!req.body.title) {
             throw new Error('Nome é obrigatório');
         }
 
@@ -21,10 +21,11 @@ const productFormHandler = (req, res, next) => {
             throw new Error('Máximo 5 arquivos');
         }
         
-        req.body.featured = (req.body.featured) ? 1 : 0;
+        req.body.destaque = (req.body.destaque) ? 1 : 0;
 
         next();
     } catch (error) {
+        console.log(error);
         res.status(204).send(error);
     }
 }
