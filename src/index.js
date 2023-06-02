@@ -29,7 +29,7 @@ const app = express();
 app.use(express.json());
 
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
-app.use('/images', express.static(path.resolve('src/public/images')));
+app.use('/images', express.static('src/public/images'));
 
 await createTable();
 await createProductTable();
@@ -101,9 +101,6 @@ app.delete('/cliente/:id', async (req, res) => {
  */
 
 createProductTable();
-
-// Usado pelas tags <img> no front para mostrar as imagens salvas
-app.use('/images', express.static(path.resolve('src/public/images')));
 
 // A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
 app.get('/produtos', URLQueryHandler, async (req, res) => {
