@@ -3,12 +3,12 @@
 const formatProduct = (query) => {
     return {
         id: query.id,
-        title: query.title,
+        name: query.name,
         slug: query.slug,
         description: query.description,
         price: query.price/100,
         images: JSON.parse(query.images).map(image => `/images/${image}`),
-        destaque: Boolean(query.destaque)
+        featured: Boolean(query.featured)
     }
 }
 
