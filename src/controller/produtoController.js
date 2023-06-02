@@ -17,11 +17,11 @@ export async function createProductTable() {
             `CREATE TABLE IF NOT EXISTS produto (
                 id              INTEGER         PRIMARY KEY,
                 slug            VARCHAR(100),
-                title           VARCHAR(100),
+                name            VARCHAR(100),
                 description     VARCHAR(100),
                 price           INTEGER,
                 images          VARCHAR(256),
-                destaque        INTEGER         DEFAULT         0
+                featured        INTEGER         DEFAULT         0
             )`
         );
     });
@@ -30,16 +30,16 @@ export async function createProductTable() {
 export async function insertProduto(produto) {
     return openDb().then(db => {
         return db.run(
-            `INSERT INTO produto (slug, title, description, price, images, destaque)
+            `INSERT INTO produto (slug, name, description, price, images, featured)
             VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
-                produto.title.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
-                produto.title,
+                produto.name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
+                produto.name,
                 produto.description,
                 Math.round(produto.price*100),
                 JSON.stringify(produto.images),
-                produto.destaque
+                produto.featured
             ]
         );
     });
@@ -58,16 +58,16 @@ export async function updateProduto(produto) {
     openDb().then(db => {
         db.run(
             `UPDATE produto
-            SET slug=?, title=?, description=?, price=?, images=?, destaque=?
+            SET slug=?, name=?, description=?, price=?, images=?, featured=?
             WHERE id=?`,
             [
                 // Lower case -> Tira caractéres inválidos -> Tira espaços duplicados -> Insere - nos espaços
-                produto.title.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
-                produto.title,
+                produto.name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, ' ').replace(/[ ]/g, '-'),
+                produto.name,
                 produto.description,
                 Math.round(produto.price*100),
                 JSON.stringify(produto.images),
-                produto.destaque
+                produto.featured
             ]
         );
     });
@@ -88,7 +88,7 @@ export async function getFeaturedProdutos() {
     return openDb().then(db => {
         return db.all(
             `SELECT * FROM produto
-            WHERE produto.destaque == 1;`
+            WHERE produto.featured == 1;`
         );
     });
 }
