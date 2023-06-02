@@ -17,6 +17,9 @@ const storage = multer.diskStorage({
             fs.mkdirSync(imageDirectory);
         }
         cb(null, imageDirectory);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
     }
 });
 
