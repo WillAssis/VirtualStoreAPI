@@ -7,7 +7,7 @@ const formatProduct = (query) => {
         slug: query.slug,
         description: query.description,
         price: query.price/100,
-        images: JSON.parse(query.images).map(image => `/images/${image}`),
+        images: JSON.parse(query.images).map(image => `http://localhost:3333/images/${image}`),
         featured: Boolean(query.featured)
     }
 }
