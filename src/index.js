@@ -1,5 +1,8 @@
 import express from "express";
-import path from "path";
+import cors from "cors";
+import mongoose from "mongoose";
+import userRouter from "./routes/user.routes.js";
+import cookieParser from "cookie-parser";
 import imageUpload from "./middlewares/imageUpload.js";
 import URLQueryHandler from "./middlewares/URLQueryHandler.js";
 import productFormHandler from "./middlewares/productFormHandler.js";
@@ -36,9 +39,16 @@ import {
   updatePedido,
 } from "./controller/produtoPedidoController.js";
 
+mongoose.connect(
+  "mongodb+srv://admin:admin@cluster0.1bfhxjk.mongodb.net/?retryWrites=true&w=majority"
+);
+
 const app = express();
 
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(userRouter);
 
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
 app.use("/images", express.static("src/public/images"));
