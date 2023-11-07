@@ -23,10 +23,15 @@ import deleteImages from './utils/deleteImage.js';
 import formatProduct from './utils/formatProduct.js';
 import { createPedidoTable, deletePedido, getAllPedidos, getPedidosFromClient, insertPedido } from './controller/pedidoController.js'
 import { createProdutoPedidoTable, getAllProdutosFromPedido, updatePedido } from './controller/produtoPedidoController.js';
+import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    allowedHeaders: ['Content-Type']
+}))
 
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
 app.use('/images', express.static('src/public/images'));
@@ -85,7 +90,6 @@ app.put('/cliente/:id', async (req, res) => {
 
 app.delete('/cliente/:id', async (req, res) => {
     const clienteAtual = await getClient(req.params.id);
-    console.log(clienteAtual)
     if (clienteAtual) {
         await deleteClient(req.params.id);
         res.status(200).send('Usuário deletado');

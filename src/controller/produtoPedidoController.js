@@ -17,9 +17,9 @@ export async function createProdutoPedidoTable() {
 };
 
 export async function createProdutoPedido(produtoPedido) {
-    const { produtoId, pedidoId, quantidade } = produtoPedido;
+    const { id, pedidoId, quantidade, slug } = produtoPedido;
 
-    const produto = await getProduto(produtoId);
+    const produto = await getProduto(slug);
     if (!produto) {
         throw {
             statusCode: 400,
@@ -27,10 +27,10 @@ export async function createProdutoPedido(produtoPedido) {
         }
     }
 
-    openDb().then(db => {
-        db.exec(`
+    openDb().then(db => async () => {
+        await db.exec(`
             INSERT INTO produto_pedido(produto_id, pedido_id, quantidade)
-            VALUES(${produtoId}, ${pedidoId}, ${quantidade})
+            VALUES(${id}, ${pedidoId}, ${quantidade})
         `)
     })
 };

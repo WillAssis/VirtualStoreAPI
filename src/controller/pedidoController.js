@@ -42,8 +42,8 @@ export async function getPedidosFromClient(clienteId) {
 };
 
 export async function insertPedido(pedido) {
-    const { clienteId, produtos } = pedido;
-    const client = await getClient(clienteId);
+    const { clientId, produtos } = pedido;
+    const client = await getClient(clientId);
 
     if (!client) {
         throw {
@@ -55,10 +55,10 @@ export async function insertPedido(pedido) {
     const pedidoResult = await Promise.resolve(openDb().then(db => {
         return db.run(`
             INSERT INTO pedido (cliente_id)
-            VALUES (${clienteId})
+            VALUES (${clientId})
         `, (err, result) => {
             if (err) {
-                return error.message;
+                return err.message;
             }
             return result;
         });

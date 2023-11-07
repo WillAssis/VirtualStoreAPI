@@ -46,8 +46,8 @@ export async function insertProduto(produto) {
 };
 
 export async function getProduto(slug) {
-    return openDb().then(db => {
-        return db.get(
+    return await openDb().then(db => async () => {
+        return await db.get(
             `SELECT * FROM produto
             WHERE produto.slug == '${slug}';`
         );
