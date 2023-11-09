@@ -182,10 +182,14 @@ app.post(
     try {
       const images = req.files.map((img) => img.filename);
       await insertProduto({ ...req.body, images: images });
-      res.status(201).send("Produto criado");
+      res.status(201).send({errors: null});
     } catch (error) {
       console.log(error);
-      res.status(204).send();
+      res.status(418).send({errors: {
+        nameError: 'erro',
+        priceError: 'erro',
+        descriptionError: 'erro',
+      }});
     }
   }
 );
