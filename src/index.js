@@ -42,11 +42,15 @@ import {
 mongoose.connect(
   "mongodb+srv://admin:admin@cluster0.1bfhxjk.mongodb.net/?retryWrites=true&w=majority"
 );
+import cors from 'cors';
 
 const app = express();
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    allowedHeaders: ['Content-Type']
+}))
 app.use(cookieParser());
 app.use(userRouter);
 
