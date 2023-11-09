@@ -11,7 +11,7 @@ Desenvolver o back-end de um sistema web de loja virtual para a comercializaçã
 <div style="display: inline_block"><br>
   <img align="center" title="JavaScript" alt="JavaScript" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg">
   <img align="center" title="Node.Js" alt="Node.Js" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg">
-  <img align="center" title="SQLite" alt="SQLite" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg">
+  <img align="center" title="MongoDB" alt="MongoDB" height="45" width="60" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg">
 </div>
 
 ## Setup
@@ -45,12 +45,12 @@ Não será necessário realizar o envio de todos os dados dos produtos.
   
 ## Status
 
-Em desenvolvimento para conclusão do Projeto Integrador I da Univesp
+Em desenvolvimento para conclusão do Projeto Integrador II da Univesp
 
 ## Desenvolvedores
 
-- <a href=""> Carlos Henrique </a>
-- <a href=""> Davi Secomandi </a>
+- <a href="https://github.com/carlosthrasher"> Carlos Henrique </a>
+- <a href="https://github.com/davi-secomandi"> Davi Secomandi </a>
 - <a href="https://github.com/eliabev"> Eliabe Oliveira </a>
 - <a href="https://github.com/jmacedo91"> Jonathan Macedo </a>
 - <a href=""> Luis Franco </a>
