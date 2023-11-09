@@ -38,24 +38,37 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   const { username, password, email } = req.body;
-  const passwordHash = await bcrypt.hash(password, saltRounds);
-  const userDoc = await User.create({
-    username,
-    password: passwordHash,
-    email,
-  });
-  const user = { id: userDoc._id, username, isAdmin: userDoc.isAdmin };
+  const existingUser = await User.findOne({ username });
 
-  jwt.sign(user, secret, {}, (error, token) => {
-    if (error) throw error;
-    res
-      .status(201)
-      .cookie("token", token)
-      .json({
-        user: { username, isAdmin: userDoc.isAdmin },
-        errors: null,
-      });
-  });
+  if (existingUser) {
+    res.status(418).json({
+      user: null,
+      errors: {
+        usernameError: "Nome de usuário já existe",
+        passwordError: "",
+        emailError: "",
+      },
+    });
+  } else {
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const userDoc = await User.create({
+      username,
+      password: passwordHash,
+      email,
+    });
+    const user = { id: userDoc._id, username, isAdmin: userDoc.isAdmin };
+
+    jwt.sign(user, secret, {}, (error, token) => {
+      if (error) throw error;
+      res
+        .status(201)
+        .cookie("token", token)
+        .json({
+          user: { username, isAdmin: userDoc.isAdmin },
+          errors: null,
+        });
+    });
+  }
 };
 
 export { login, register };

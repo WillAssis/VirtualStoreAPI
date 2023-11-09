@@ -42,12 +42,12 @@ import {
 mongoose.connect(
   "mongodb+srv://admin:admin@cluster0.1bfhxjk.mongodb.net/?retryWrites=true&w=majority"
 );
-import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
 app.use(cors({
+    credentials: true,
     origin: 'http://localhost:3000',
     allowedHeaders: ['Content-Type']
 }))
@@ -164,7 +164,7 @@ app.get("/destaques", async (req, res) => {
     const result = await getFeaturedProdutos();
     const produtos = result.map(formatProduct);
     if (produtos.length > 0) {
-      res.status(200).send(produtos);
+      res.status(200).send({ products: produtos });
     } else {
       res.status(204).send();
     }
@@ -182,10 +182,14 @@ app.post(
     try {
       const images = req.files.map((img) => img.filename);
       await insertProduto({ ...req.body, images: images });
-      res.status(201).send("Produto criado");
+      res.status(201).send({errors: null});
     } catch (error) {
       console.log(error);
-      res.status(204).send();
+      res.status(418).send({errors: {
+        nameError: 'erro',
+        priceError: 'erro',
+        descriptionError: 'erro',
+      }});
     }
   }
 );

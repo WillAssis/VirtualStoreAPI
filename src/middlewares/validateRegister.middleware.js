@@ -1,5 +1,3 @@
-import User from "../models/user.js";
-
 const validateUsername = (username) => {
   return username.length === 0 ? "Nome de usuário é requerido" : "";
 };
@@ -23,10 +21,7 @@ const validateEmail = (email) => {
 
 const validateRegister = async (req, res, next) => {
   const { username, password, email } = req.body;
-  const existingUser = await User.findOne({ username });
-  const usernameError = existingUser
-    ? "Nome de usuário já existe"
-    : validateUsername(username);
+  const usernameError = validateUsername(username);
   const passwordError = validatePassword(password);
   const emailError = validateEmail(email);
   const isValid =
