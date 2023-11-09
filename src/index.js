@@ -42,7 +42,6 @@ import {
 mongoose.connect(
   "mongodb+srv://admin:admin@cluster0.1bfhxjk.mongodb.net/?retryWrites=true&w=majority"
 );
-import cors from 'cors';
 
 const app = express();
 
