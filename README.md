@@ -1,10 +1,10 @@
-# Projeto Integrador I - Univesp
+# Projeto Integrador II - Univesp
 
-Grupo - OSASCOUAB-PJI110-SALA-001GRUPO-001
+Grupo - DRP01-PJI240-SALA-002GRUPO-006
 
 ## Sobre o projeto
 
-Desenvolver o back-end de um sistema web de vitrine virtual para a exibição dos produtos de uma loja.
+Desenvolver o back-end de um sistema web de loja virtual para a comercialização dos produtos de uma loja.
 
 ## Tecnologias
 
