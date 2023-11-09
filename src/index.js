@@ -164,7 +164,7 @@ app.get("/destaques", async (req, res) => {
     const result = await getFeaturedProdutos();
     const produtos = result.map(formatProduct);
     if (produtos.length > 0) {
-      res.status(200).send(produtos);
+      res.status(200).send({ products: produtos });
     } else {
       res.status(204).send();
     }
