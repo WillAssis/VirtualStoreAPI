@@ -46,10 +46,10 @@ export async function insertProduto(produto) {
 };
 
 export async function getProduto(slug) {
-    return await openDb().then(db => async () => {
+    return await openDb().then(async (db) => {
         return await db.get(
-            `SELECT * FROM produto
-            WHERE produto.slug == '${slug}';`
+            `SELECT * FROM produto p
+            WHERE p.slug == '${slug}'`
         );
     });
 };
@@ -76,7 +76,7 @@ export async function updateProduto(produto) {
 export async function getProdutos(data) {
     return openDb().then(db => {
         return db.all(
-            `SELECT * FROM produto
+            `SELECT * FROM produto p
             ${(data.search) ? `WHERE LOWER(name) LIKE '%${data.search}%'` : ''}
             ${(data.orderBy) ? `ORDER BY ${data.orderBy}` : ''}
             LIMIT 12 OFFSET ${data.pageSize * (data.page - 1)};`
