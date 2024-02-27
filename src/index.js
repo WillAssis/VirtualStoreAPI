@@ -1,19 +1,13 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import userRouter from "./routes/user.routes.js";
+import userRouter from "./routes/user.routes";
 import cookieParser from "cookie-parser";
-import imageUpload from "./middlewares/imageUpload.js";
-import URLQueryHandler from "./middlewares/URLQueryHandler.js";
-import productFormHandler from "./middlewares/productFormHandler.js";
-import {
-  createTable,
-  deleteClient,
-  getAllClients,
-  getClient,
-  insertClient,
-  updateClient,
-} from "./controller/clienteController.js";
+import imageUpload from "./middlewares/imageUpload";
+import URLQueryHandler from "./middlewares/URLQueryHandler";
+import productFormHandler from "./middlewares/productFormHandler";
+import { createTable } from "./controller/clienteController";
+import clientRoute from "./routes/clientRoute";
 import {
   getFeaturedProdutos,
   countProdutos,
@@ -23,21 +17,21 @@ import {
   getProduto,
   insertProduto,
   updateProduto,
-} from "./controller/produtoController.js";
-import deleteImages from "./utils/deleteImage.js";
-import formatProduct from "./utils/formatProduct.js";
+} from "./controller/produtoController";
+import deleteImages from "./utils/deleteImage";
+import formatProduct from "./utils/formatProduct";
 import {
   createPedidoTable,
   deletePedido,
   getAllPedidos,
   getPedidosFromClient,
   insertPedido,
-} from "./controller/pedidoController.js";
+} from "./controller/pedidoController";
 import {
   createProdutoPedidoTable,
   getAllProdutosFromPedido,
   updatePedido,
-} from "./controller/produtoPedidoController.js";
+} from "./controller/produtoPedidoController";
 
 mongoose.connect(
   "mongodb+srv://admin:admin@cluster0.1bfhxjk.mongodb.net/?retryWrites=true&w=majority"
@@ -52,66 +46,22 @@ app.use(cors({
     allowedHeaders: ['Content-Type']
 }))
 app.use(cookieParser());
-app.use(userRouter);
+const routers = [
+  userRouter,
+  clientRoute
+]
+
+for (const router of routers) {
+  app.use(router);
+}
 
 // Usado pelas tags <img> no HTML para mostrar as imagens salvas
 app.use("/images", express.static("src/public/images"));
 
-await createTable();
-await createProductTable();
-await createPedidoTable();
-await createProdutoPedidoTable();
+Promise.all([createTable(), createProductTable(), createPedidoTable(), createProdutoPedidoTable()]);
 
 app.get("/", (req, res) => {
   res.send("Bem vindo ao nosso Projeto :)");
-});
-
-app.get("/cliente", async (req, res) => {
-  const clients = await getAllClients();
-  res.send(clients);
-});
-
-app.get("/cliente/:id", async (req, res) => {
-  const result = await getClient(req.params.id);
-  if (!result) {
-    res.status(204).send();
-  }
-  if (result) {
-    res.status(200).send(result);
-  }
-});
-
-app.post("/cliente", async (req, res) => {
-  const { cliente } = req.body;
-  const result = await insertClient(cliente);
-  res.status(201).send({
-    id: result.lastID,
-    ...cliente,
-  });
-});
-
-app.put("/cliente/:id", async (req, res) => {
-  const clienteAtual = await getClient(req.params.id);
-  if (clienteAtual) {
-    await updateClient(req.body);
-    res.status(200).send({
-      id: req.params.id,
-      ...req.body,
-    });
-  } else {
-    res.status(204).send();
-  }
-});
-
-app.delete("/cliente/:id", async (req, res) => {
-  const clienteAtual = await getClient(req.params.id);
-  console.log(clienteAtual);
-  if (clienteAtual) {
-    await deleteClient(req.params.id);
-    res.status(200).send("Usuário deletado");
-  } else {
-    res.status(204).send();
-  }
 });
 
 /**
@@ -119,8 +69,6 @@ app.delete("/cliente/:id", async (req, res) => {
  *      -> Fazer verificações relacionadas à segurança;
  *      -> Criar autenticação para as operações de post, put e delete.
  */
-
-createProductTable();
 
 // A quantidade de resultados é enviada para o front-end para facilitar a criação dos botões de paginação
 app.get("/produtos", URLQueryHandler, async (req, res) => {

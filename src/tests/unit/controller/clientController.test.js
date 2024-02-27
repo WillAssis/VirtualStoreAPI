@@ -1,4 +1,4 @@
-const clientController = require('../../../controller/clienteController.js');
+const clientController = require('../../../controller/clienteController');
 
 describe('clientController', () => {
     describe('createClient', () => {

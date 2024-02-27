@@ -1,4 +1,4 @@
-import { openDb } from "../configDb.js";
+import { openDb } from "../configDb";
 
 /**
  * Gambiarras:

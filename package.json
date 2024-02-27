@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Grupo - OSASCOUAB-PJI110-SALA-001GRUPO-001",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "jest --testPathPattern=tests",
-    "start": "nodemon src/index.js",
+    "start": "npm i && nodemon src/index.js",
     "prepare": "husky install"
   },
   "keywords": [],

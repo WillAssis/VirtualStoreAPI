@@ -1,6 +1,6 @@
-import { openDb } from "../configDb.js";
-import { getClient } from "./clienteController.js";
-import { createProdutoPedido } from "./produtoPedidoController.js";
+import { openDb } from "../configDb";
+import { getClient } from "./clienteController";
+import { createProdutoPedido } from "./produtoPedidoController";
 
 export async function createPedidoTable() {
     openDb().then(db => {
