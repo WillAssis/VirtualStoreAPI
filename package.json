@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest --testPathPattern=tests",
-    "start": "npm i && nodemon src/index.js",
+    "start": "nodemon src/index.js",
     "prepare": "husky install"
   },
   "keywords": [],

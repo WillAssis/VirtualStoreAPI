@@ -1,5 +1,5 @@
-import { openDb } from "../configDb";
-import { getProduto } from "./produtoController";
+import { openDb } from "../configDb.js";
+import { getProduto } from "./produtoController.js";
 
 export async function createProdutoPedidoTable() {
     openDb().then(db => {
